@@ -41,18 +41,13 @@ pd.set_option('display.width', 1000)
 pd.set_option('display.max_columns', 500)
 pd.set_option('precision', 2)
 
-conf = (SparkConf().setAppName("goodsinger_model_fit"))
-sc = SparkContext(conf=conf)
-spark = SparkSession(sc)
+from pyspark.sql import SQLContext,SparkSession
 
-# 导入隐特征数据
-def load_unvi_features(dim=10):
-    os.chdir(DATA_PATH)
-    f_name='star_unvisible_features_%s.txt' %dim
-    df=pd.read_table(f_name, sep='\t', encoding='utf-8', error_bad_lines=False, warn_bad_lines=True)
-    df[['starid']]=df[['starid']].astype(str)
-    df.replace('\\N', 0, inplace=True)
-    return df
+spark = SparkSession \
+    .builder \
+    .appName("DeepDataInput") \
+    .enableHiveSupport() \
+    .getOrCreate()
 
 # 生成xy数据
 def span_xy(df,x_cols,y_col):
@@ -92,59 +87,10 @@ def scale_data(X_data):
     scale_data=scaler.fit_transform(X_data)
     return scale_data
 
-# 关联隐特征数据
-def join_unvi_df(df,unvidf):
-    df['fxid']=df['fxid'].astype('str')
-    join_df=pd.merge(df,unvidf,how='inner',left_on='fxid',right_on='starid')
-    return join_df
-
-# PCA降维
-def pca_data(df,components_num):
-    from sklearn.decomposition import PCA
-    pca=PCA(n_components=components_num)
-    pca_data= pca.fit_transform(df)
-    return pca_data
-
-# 训练数据主函数
-def main_proce_for_train(x_cols,y_col):
-    df=spark.sql("select * from temp.good_singer_feature")
-    #df=load_data('train_good_singer_features.txt')
-    df=df.toPandas()
-    # df=trans_data(df)
-    df=df.fillna(0)
-    #unvi_df=load_unvi_features(20)
-    #join_df=join_unvi_df(df,unvi_df)
-    #starids=join_df['fxid']
-    starids=df['fxid']
-    X,Y=span_xy(df,x_cols,y_col)
-    X,scaler=scale_data(X)
-    return X,Y,scaler,starids
-
-# 匹配数据主函数
-def main_proce_for_fit(x_cols,y_col):
-    df=spark.sql("select * from temp.predict_singer_feature")
-    df=df.toPandas()
-    df=df.fillna(0)
-    # df=trans_data(df)
-    #unvi_df=load_unvi_features(20)
-    #join_df=join_unvi_df(df,unvi_df)
-    starids=df['fxid']
-    X=df[x_cols]
-    X_train,Y_train,scaler,_=main_proce_for_train(x_cols,y_col)
-    return X_train,Y_train,X,starids
-
 def main_proce(x_cols,y_col,is_train=True):
-    table = 'fx_dal.good_singer_star_sing_feature'
-    print('-'*100 + '\n')
-    print(table)
-    print('\n' + '-'*100)
-    sql = u"use fx_dal;select * from good_singer_star_sing_feature where dt='%s'"%(dt)
-    print('-'*100 + '\n')
-    print(sql)
-    print('\n' + '-'*100)
-    df = spark.sql(a)
-    df = df.toPandas()
-    df = df.fillna(0)
+    df=spark.sql("select * from temp.good_singer_star_sing_feature")
+    df=df.toPandas()
+    df=df.fillna(0)
     starids=df['fxid']
     X,Y=span_xy(df,x_cols,y_col)
     X=scale_data(X)

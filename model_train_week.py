@@ -60,7 +60,7 @@ def ana_model(X_test,y_true,y_prob,starids):
     df=df[df['distance']>=0.5]
     # print(df)
     os.chdir(OUT_PATH)
-    df.to_csv('test_out.csv',sep=',',index=None)
+    df.to_csv('test_out_week.csv',sep=',',index=None)
 
 def evaluate_model(y_true,y_prob,thresh=0.5,model_name=None):
     source_dir=os.getcwd()
@@ -167,7 +167,7 @@ def tune_mlp(X_data,Y_data,starids):
     best_clf=search.best_estimator_
     best_clf.fit(X_train,Y_train)
     os.chdir(MODEL_PATH)
-    joblib.dump(best_clf ,'best_mlp.model' )
+    joblib.dump(best_clf ,'best_mlp_week.model' )
     # 最佳超参数
     best_params=search.best_params_
     best_socre=search.best_score_
@@ -211,7 +211,7 @@ def tune_gbdt(X_data,Y_data,starids):
     best_clf=search.best_estimator_
     best_clf.fit(X_train, Y_train)
     os.chdir(MODEL_PATH)
-    joblib.dump(best_clf ,'best_gbdt.model' )
+    joblib.dump(best_clf ,'best_gbdt_week.model' )
     # 最佳超参数
     best_params=search.best_params_
     best_socre=search.best_score_
@@ -245,7 +245,7 @@ def train_mlp(X_data,Y_data,starids):
     from sklearn.externals import joblib
     # 保存模型
     os.chdir(MODEL_PATH)
-    joblib.dump(clf ,'best_mlp.model' )
+    joblib.dump(clf ,'best_mlp_week.model' )
     return clf
 
 # 训练gbdt 模型
@@ -259,7 +259,7 @@ def train_gbdt(X_data,Y_data,starids):
     from sklearn.externals import joblib
     # 保存模型
     os.chdir(MODEL_PATH)
-    joblib.dump(clf ,'best_gbdt.model' )
+    joblib.dump(clf ,'best_gbdt_week.model' )
     return clf
 
 if __name__=='__main__':
